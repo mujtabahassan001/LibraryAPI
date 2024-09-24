@@ -16,7 +16,7 @@ namespace LibraryAPI.Data
         {
             modelBuilder.Entity<Book>()
            .HasMany(b => b.Reviews)
-           .WithOne(r => r.Book)
+           .WithOne()
            .HasForeignKey(r => r.BookId);
         }
 
