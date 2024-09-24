@@ -8,55 +8,76 @@ namespace LibraryAPI.Controllers
 {
     [ApiController]
     [Route("api/books/{bookId}/[controller]")]
-    public class ReviewsController : ControllerBase
-    {
-        private readonly ApplicationDbContext dbContext;
+  public class ReviewController : ControllerBase
+ {
+     private readonly ApplicationDbContext _context;
 
-        public ReviewsController(ApplicationDbContext dbContext)
-        {
-            this.dbContext = dbContext;
-        }
+     public ReviewController(ApplicationDbContext context)
+     {
+         _context = context;
+     }
 
-        [HttpPost]
-        public async Task<ActionResult<Review>> PostReview(int bookId, Review review)
-        {
-            var book = await dbContext.Books.FindAsync(bookId);
-            if (book == null)
-            {
-                return NotFound();
-            }
+     // POST: api/books/{bookId}/reviews
+     [HttpPost]
+     public async Task<ActionResult<Review>> PostReview(int bookId, Review review)
+     {
+         // Check if the book exists
+         var book = await _context.Books.FindAsync(bookId);
+         if (book == null)
+         {
+             return NotFound(new { message = "Book not found" });
+         }
 
-            review.BookId = bookId;
-            dbContext.Reviews.Add(review);
-            await dbContext.SaveChangesAsync();
+         // Associate the review with the book via BookId
+         review.BookId = bookId;
 
-            return CreatedAtAction(nameof(GetReview), new { id = review.Id }, review);
-        }
+         // Add and save the review
+         _context.Reviews.Add(review);
+         await _context.SaveChangesAsync();
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReview(int id)
-        {
-            var review = await dbContext.Reviews.FindAsync(id);
-            if (review == null)
-            {
-                return NotFound();
-            }
+         // Return only the review data, without the book details
+         return CreatedAtAction(nameof(GetReviewById), new { id = review.Id }, new
+         {
+             review.Id,
+             review.BookId,
+             review.ReviewerName,
+             review.Rating,
+             review.Comment
+         });
+     }
+     // DELETE: api/reviews/{id}
+     [HttpDelete("{id}")]
+     public async Task<IActionResult> DeleteReview(int id)
+     {
+         var review = await _context.Reviews.FindAsync(id);
+         if (review == null)
+         {
+             return NotFound();
+         }
 
-            dbContext.Reviews.Remove(review);
-            await dbContext.SaveChangesAsync();
-            return NoContent();
-        }
+         _context.Reviews.Remove(review);
+         await _context.SaveChangesAsync();
+         return NoContent();
+     }
 
-        // Helper method for fetching review
-        private ActionResult<Review> GetReview(int id)
-        {
-            var review = dbContext.Reviews.Find(id);
-            if (review is null)
-            {
-                return NotFound();
-            }
-            return review;
-        }
+     // Helper method to get a specific review (used in CreatedAtAction)
+     [HttpGet("{id}")]
+     public async Task<ActionResult<Review>> GetReviewById(int id)
+     {
+         var review = await _context.Reviews.FindAsync(id);
+         if (review == null)
+         {
+             return NotFound();
+         }
 
-    }
+         return Ok(new
+         {
+             review.Id,
+             review.BookId,
+             review.ReviewerName,
+             review.Rating,
+             review.Comment
+         });
+     }
+ }
 }
