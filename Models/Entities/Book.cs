@@ -18,6 +18,6 @@ namespace LibraryAPI.Models.Entities
         public string? Genre { get; set; }
 
         // Navigation property
-        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual List<Review> Reviews { get; set; } = new List<Review>();
     }
 }
