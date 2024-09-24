@@ -1,4 +1,4 @@
-﻿using LibraryAPI.Data;
+using LibraryAPI.Data;
 using LibraryAPI.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,19 +25,9 @@ namespace LibraryAPI.Controllers
             return await dbContext.Books.Include(b => b.Reviews).ToListAsync();
         }
 
-        //Get all Books
-        //[HttpGet]
-        //public IActionResult GetAllBooks()
-        //{
-        //    var allBooks = dbContext.Books.ToList();
-
-        //    return Ok(allBooks);
-        //}
-
         //Get Book by ID
         [HttpGet]
         [Route("{id}")]
-        //public async IActionResult GetBookById(int id)
             public async Task<ActionResult<Book>> GetBook(int id)
         {
             var book = await dbContext.Books.Include(b => b.Reviews).FirstOrDefaultAsync(b => b.Id == id);
@@ -46,14 +36,6 @@ namespace LibraryAPI.Controllers
                 return NotFound();
             }
             return book;
-
-            //var books = dbContext.Books.Find(id);
-
-            //if (books is null)
-            //{
-            //    return NotFound();
-            //}
-            //return Ok(books);
         }
 
         //Add a new Book
